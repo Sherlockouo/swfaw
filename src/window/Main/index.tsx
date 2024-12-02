@@ -1,44 +1,59 @@
 import React, { useState, useEffect } from "react";
-import { getCurrentWindow } from "@tauri-apps/api/window";
-import { Button, Image } from "@nextui-org/react";
-import { CircularProgress } from "@nextui-org/react";
+import Layout from "@/page/layout";
+import { useStore } from "@/store";
+import { invoke } from "@tauri-apps/api/core";
+import { useConfig } from "@/hooks/useConfig";
+import { insertOrUpdateLastInteraction } from "@/lib/db";
+import { formatDateToYYYYMMDD } from "@/lib/format";
+import { eventBus } from "@/lib/event-bus";
 
 export default function Main() {
-  const breakInterval = 60 * 1000; // 25分钟休息间隔
-  const [showOverlay, setShowOverlay] = useState(false);
-  const [lastInteraction, setLastInteraction] = useState(Date.now());
-  const [timeToNextBreak, setTimeToNextBreak] = useState(breakInterval);
-
-  // 控制窗口的逻辑
-  const focusAndMaximizeWindow = async () => {
-    const currentWindow = getCurrentWindow();
-
-    const isVisible = await currentWindow.isVisible();
-    const isMaximized = await currentWindow.isMaximized();
-
-    if (!isVisible) {
-      await currentWindow.show();
-    }
-
-    if (!isMaximized) {
-      await currentWindow.maximize();
-    }
-
-    // 等待动画完成（如有必要）
-    await new Promise((resolve) => setTimeout(resolve, 200));
-
-    await currentWindow.setFocus();
-  };
+  const breakInterval = 20 * 60 * 1000; // 20分钟休息一次
+  // const breakInterval = 1 * 60 * 1000; // 20分钟休息一次
+  // 使用 useConfig 管理 'lastInteraction'，以字符串格式存储和恢复
+  const [lastInteraction, setLastInteraction] = useConfig(
+    "lastInteraction",
+    Date.now(),
+    {
+      sync: true, // 同步到本地存储
+    },
+  );
 
   // 定时检查是否需要显示休息提醒
   useEffect(() => {
     const checkTime = async () => {
       const currentTime = Date.now();
-      const timeSinceLastInteraction = currentTime - lastInteraction;
 
+      const date = new Date(currentTime);
+
+      // 获取当前时间的小时
+      const currentHour = date.getHours();
+
+      // 仅在早上8点到晚上10点之间执行
+      if (currentHour < 8 || currentHour >= 22) {
+        console.log("Not in working time range.");
+        return; // 如果不在指定时间范围内，直接返回
+      }
+
+      const timeSinceLastInteraction = currentTime - lastInteraction;
       if (timeSinceLastInteraction >= breakInterval) {
-        setShowOverlay(true);
-        await focusAndMaximizeWindow();
+        await invoke("create_or_show_window", {
+          label: "notify", // 窗口标识符
+          title: "Stop Working For A While!", // 窗口标题
+          width: 1024, // 窗口宽度
+          height: 768, // 窗口高度
+          show: false, // 窗口是否显示
+        });
+
+        const now = Date.now();
+        await insertOrUpdateLastInteraction({
+          day: formatDateToYYYYMMDD(new Date()),
+          created_at: now,
+          updated_at: now,
+          timestamp: now,
+        });
+        eventBus.trigger("refresh-last-interaction", now);
+        setLastInteraction(Date.now());
       }
     };
 
@@ -46,75 +61,9 @@ export default function Main() {
     return () => clearInterval(interval);
   }, [lastInteraction]);
 
-  // 实时更新距离下一次休息的倒计时
-  useEffect(() => {
-    const countdownInterval = setInterval(() => {
-      const currentTime = Date.now();
-      const timeSinceLastInteraction = currentTime - lastInteraction;
-      const remainingTime = Math.max(
-        breakInterval - timeSinceLastInteraction,
-        0,
-      );
-      console.log("remain", remainingTime);
-      setTimeToNextBreak(remainingTime);
-    }, 1000); // 每秒更新一次倒计时
-
-    return () => clearInterval(countdownInterval);
-  }, [lastInteraction]);
-
-  // 关闭休息提醒
-  const handleCloseOverlay = async () => {
-    setShowOverlay(false);
-    setLastInteraction(Date.now()); // 重置最后交互时间
-
-    const currentWindow = getCurrentWindow();
-    await currentWindow.hide();
-  };
-
-  // 格式化倒计时为 mm:ss
-  const formatTime = (ms: number) => {
-    const minutes = Math.floor(ms / 1000 / 60);
-    const seconds = Math.floor((ms / 1000) % 60);
-    return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
-  };
-
   return (
     <div className="App h-screen w-screen">
-      {showOverlay ? (
-        // 休息提醒界面
-        <div className="fixed inset-0 bg-green-200 flex justify-center items-center z-50">
-          <Button
-            color="success"
-            onClick={handleCloseOverlay}
-            className=" p-4 rounded-md shadow"
-          >
-            Take a Break
-          </Button>
-        </div>
-      ) : (
-        // 正常工作界面
-        <div className="flex flex-col justify-center items-center h-screen">
-          <h1 className="text-2xl font-bold">Stop working for a while?</h1>
-          <p className="mt-4 text-lg">
-            Time to next break:{" "}
-            <span className="font-mono">{formatTime(timeToNextBreak)}</span>
-          </p>
-          <CircularProgress
-            value={timeToNextBreak / breakInterval * 100}
-            color="success"
-            size="lg"
-            showValueLabel
-          />
-
-          <Image
-            isBlurred
-            width={240}
-            src="https://nextui.org/images/album-cover.png"
-            alt="NextUI Album Cover"
-            className="m-5"
-          />
-        </div>
-      )}
+      <Layout />
     </div>
   );
 }

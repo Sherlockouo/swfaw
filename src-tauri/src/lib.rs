@@ -1,22 +1,52 @@
 #[cfg(desktop)]
 mod tray;
+mod window;
 
-use tauri::{
-    webview::{PageLoadEvent, WebviewWindowBuilder},
-    App, AppHandle, Emitter, Listener, RunEvent, WebviewUrl,
-};
+use tauri::{Manager, RunEvent};
+use window::WindowManager;
 
 #[tauri::command]
-fn greet(name: &str) -> String {
-    format!("Hello, {}! You've been greeted from Rust!", name)
+async fn create_symlink(source: String, target: String) -> Result<(), String> {
+    std::os::unix::fs::symlink(source.clone(), target.clone()).map_err(|err| {
+        format!(
+            "Failed to create symlink from {} to {}: {}",
+            source, target, err
+        )
+    })
+}
+
+#[tauri::command]
+async fn create_or_show_window(
+    app: tauri::AppHandle,
+    label: String,
+    title: String,
+    width: f64,
+    height: f64,
+    show: bool,
+) {
+    // 检查窗口是否已经存在
+    if let Some(_window) = app.get_webview_window(&label) {
+        // 如果窗口存在并且 `show` 参数为 true，则显示窗口
+        // window.show().unwrap_or_else(|err| {
+        //     eprintln!("Failed to show window {}: {}", label, err);
+        // });
+        //
+    } else {
+        // 如果窗口不存在，则创建新窗口
+        WindowManager::create_window(&app, &label, &title, width, height);
+    }
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     #[allow(unused_mut)]
     let mut builder = tauri::Builder::default()
+        .plugin(tauri_plugin_store::Builder::default().build()) // store
+        .plugin(tauri_plugin_sql::Builder::default().build())
+        .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_window_state::Builder::default().build())
         .plugin(tauri_plugin_shell::init())
+        .plugin(tauri_plugin_dialog::init())
         .setup(move |app| {
             #[cfg(desktop)]
             {
@@ -33,7 +63,10 @@ pub fn run() {
 
     #[allow(unused_mut)]
     let mut app = builder
-        .invoke_handler(tauri::generate_handler![greet])
+        .invoke_handler(tauri::generate_handler![
+            create_or_show_window,
+            create_symlink
+        ])
         .build(tauri::generate_context!())
         .expect("error while running tauri application");
 
