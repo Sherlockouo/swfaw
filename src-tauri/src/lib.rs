@@ -1,9 +1,10 @@
 #[cfg(desktop)]
 mod tray;
-mod window;
+mod windows;
 
 use tauri::{Manager, RunEvent};
-use window::WindowManager;
+use tauri_plugin_autostart::MacosLauncher;
+use windows::WindowManager;
 
 #[tauri::command]
 async fn create_symlink(source: String, target: String) -> Result<(), String> {
@@ -41,6 +42,10 @@ async fn create_or_show_window(
 pub fn run() {
     #[allow(unused_mut)]
     let mut builder = tauri::Builder::default()
+        .plugin(tauri_plugin_autostart::init(
+            MacosLauncher::LaunchAgent,
+            Some(vec!["com.sherlockouo.app"]),
+        ))
         .plugin(tauri_plugin_store::Builder::default().build()) // store
         .plugin(tauri_plugin_sql::Builder::default().build())
         .plugin(tauri_plugin_fs::init())

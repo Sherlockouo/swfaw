@@ -1,5 +1,4 @@
 import { useEffect, useState, useCallback } from "react";
-import { useConfig } from "@/hooks/useConfig";
 import { formatDateToYYYYMMDD, formatTime } from "@/lib/format";
 import {
   Card,
@@ -7,20 +6,19 @@ import {
   CardBody,
   CircularProgress,
   Button,
-  Skeleton,
 } from "@nextui-org/react";
-import { toast } from "sonner";
-import { RestInfo } from "@/types/rest";
 import React from "react";
 import { getTodayLastInteraction, getTodayRestCounts } from "@/lib/db";
-import { LastInteraction, RestCount } from "@/types/dbt";
+import { LastInteraction } from "@/types/dbt";
 import { eventBus } from "@/lib/event-bus";
+import { useStore } from "@/store";
 
 const Dashboard: React.FC = React.memo(() => {
   const breakInterval = 20 * 60 * 1000; // 20分钟休息一次
   const [lastInteraction, updateLastInteraction] = useState(0);
   const [timeLeft, setTimeLeft] = useState(() => breakInterval);
 
+  const { isWorkingTime } = useStore();
   const [todayRestCount, setTodayRestCount] = useState(0);
 
   const refreshRestCount = (newRestcount: number) => {
@@ -48,6 +46,7 @@ const Dashboard: React.FC = React.memo(() => {
     };
   }, []);
 
+  // 今日休息次数
   useEffect(() => {
     getTodayRestCounts(formatDateToYYYYMMDD(new Date())).then(
       (restCount: number | null) => {
@@ -72,7 +71,7 @@ const Dashboard: React.FC = React.memo(() => {
   }, []);
 
   useEffect(() => {
-    if (lastInteraction === 0) return; // 如果倒计时结束，停止计时
+    if (lastInteraction === 0 || !isWorkingTime) return; // 如果倒计时结束，停止计时
 
     const timerId = setInterval(() => {
       const timePassed = Date.now() - lastInteraction;
@@ -98,25 +97,43 @@ const Dashboard: React.FC = React.memo(() => {
             Time To Next Rest
           </CardHeader>
           <CardBody className="overflow-visible py-2 flex items-center justify-center">
-            <div>
-              <CircularProgress
-                aria-label="Time To Next Rest"
-                value={(timeLeft / breakInterval) * 100}
-                color="success"
-                size={"lg"}
-                showValueLabel
-              />
-              <span className="font-mono">{formatTime(timeLeft)}</span>
-            </div>
+            {isWorkingTime ? (
+              <div>
+                <CircularProgress
+                  aria-label="Time To Next Rest"
+                  value={(timeLeft / breakInterval) * 100}
+                  color="success"
+                  size={"lg"}
+                  showValueLabel
+                />
+                <span className="font-mono">{formatTime(timeLeft)}</span>
+              </div>
+            ) : (
+              <div className="flex flex-col justify-center items-center">
+                <CircularProgress
+                  aria-label="NightTime"
+                  value={0}
+                  color="default"
+                  size={"lg"}
+                  showValueLabel
+                />
+                <span className="font-mono">{"NightTime"}</span>
+              </div>
+            )}
             <div className="flex gap-2">
-              <Button size={"sm"} color="warning" onClick={handleReset}>
+              <Button
+                size={"sm"}
+                color={isWorkingTime ? "warning" : "default"}
+                onClick={handleReset}
+                disabled={!isWorkingTime}
+              >
                 Reset
               </Button>
               <Button
                 size={"sm"}
-                color="danger"
-                className="bg-red-500"
+                color={isWorkingTime ? "danger" : "default"}
                 onClick={handleReset}
+                disabled={!isWorkingTime}
               >
                 Stop
               </Button>

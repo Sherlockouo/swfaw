@@ -23,6 +23,9 @@
     "dialog:allow-message",
     "sql:default",
     "sql:allow-load",
-    "sql:allow-execute"
+    "sql:allow-execute",
+    "autostart:allow-is-enabled",
+    "autostart:allow-enable",
+    "autostart:default"
   ]
 }

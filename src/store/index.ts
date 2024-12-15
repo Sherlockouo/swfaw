@@ -1,18 +1,20 @@
 import { create } from "zustand";
-import { getStoreValue, setStoreValue } from "./persist-store";
+// import { getStoreValue, setStoreValue } from "./persist-store";
 
 // 定义用户状态接口
 interface State {
-  lastInteraction: Date;
-  updateLastInteraction: () => void;
+  isWorkingTime: boolean;
+  updateWorkingTime: () => void;
 }
 
-// 创建 Zustand Store，使用中间件
 export const useStore = create<State>((set) => ({
-  lastInteraction: new Date(), // 临时初始值
-  updateLastInteraction: () => {
-    const newDate = new Date();
-    set({ lastInteraction: newDate });
-    setStoreValue("lastInteraction", newDate);
+  isWorkingTime: true,
+  updateWorkingTime: () => {
+    const currentTime = Date.now();
+    const date = new Date(currentTime);
+    const currentHour = date.getHours();
+    // 仅在早上8点到晚上10点之间
+    const isWorkingTime = currentHour >= 8 && currentHour < 22;
+    set({ isWorkingTime });
   },
 }));

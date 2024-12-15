@@ -1,15 +1,13 @@
-import React, { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import Rest from "@/page/notification/rest";
-import { useStore } from "@/store";
-import { useConfig } from "@/hooks/useConfig";
 
 export default function Notify() {
-  const [lastInteraction, setLastInteraction] = useConfig(
-    "lastInteraction",
-    Date.now(), // 默认值为 ISO 字符串
-    { sync: true },
-  );
+  // const [lastInteraction, setLastInteraction] = useConfig(
+  //   "lastInteraction",
+  //   Date.now(), // 默认值为 ISO 字符串
+  //   { sync: true },
+  // );
 
   // 控制窗口的逻辑
   const focusAndMaximizeWindow = async () => {

@@ -1,6 +1,6 @@
 import { useRoutes } from "react-router-dom";
 import routes from "@/route";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { cn } from "@/lib/utils";
 
@@ -14,8 +14,8 @@ export default function Layout() {
     >
       <SidebarProvider>
         <AppSidebar />
-        <main>
-          <SidebarTrigger />
+        <main className="flex flex-col w-full">
+          {/* <SidebarTrigger /> */}
           <Main />
         </main>
       </SidebarProvider>

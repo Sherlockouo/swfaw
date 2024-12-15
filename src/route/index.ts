@@ -6,6 +6,10 @@ import React from "react";
 import Dashboard from "@/page/dashboard";
 import Tools from "@/page/tools";
 import CustomCalendar from "@/page/calendar";
+import Ctx from "@/page/ctx";
+import SoftLinkCreator from "@/page/tools/symlink";
+import Todo from "@/page/ctx/Todo";
+import ReadWise from "@/page/ctx/readwise";
 
 const routes: RouteObject[] = [
   {
@@ -15,6 +19,26 @@ const routes: RouteObject[] = [
   {
     path: "/tools",
     element: React.createElement(Tools),
+  },
+  {
+    path: "/tools/symlink",
+    element: React.createElement(SoftLinkCreator),
+  },
+  {
+    path: "/ctx",
+    element: React.createElement(Ctx),
+  },
+  {
+    path: "/ctx/code",
+    element: React.createElement(Ctx),
+  },
+  {
+    path: "/ctx/todo",
+    element: React.createElement(Todo),
+  },
+  {
+    path: "/ctx/readwise",
+    element: React.createElement(ReadWise),
   },
   {
     path: "/calendar",

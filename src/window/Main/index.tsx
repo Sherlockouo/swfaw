@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useEffect } from "react";
 import Layout from "@/page/layout";
 import { useStore } from "@/store";
 import { invoke } from "@tauri-apps/api/core";
@@ -6,6 +6,7 @@ import { useConfig } from "@/hooks/useConfig";
 import { insertOrUpdateLastInteraction } from "@/lib/db";
 import { formatDateToYYYYMMDD } from "@/lib/format";
 import { eventBus } from "@/lib/event-bus";
+import CMDK from "@/components/commandk";
 
 export default function Main() {
   const breakInterval = 20 * 60 * 1000; // 20分钟休息一次
@@ -19,18 +20,14 @@ export default function Main() {
     },
   );
 
+  const { isWorkingTime, updateWorkingTime } = useStore();
+
   // 定时检查是否需要显示休息提醒
   useEffect(() => {
     const checkTime = async () => {
       const currentTime = Date.now();
-
-      const date = new Date(currentTime);
-
-      // 获取当前时间的小时
-      const currentHour = date.getHours();
-
-      // 仅在早上8点到晚上10点之间执行
-      if (currentHour < 8 || currentHour >= 22) {
+      updateWorkingTime(); // 更新 isWorkingTime 状态
+      if (!isWorkingTime) {
         console.log("Not in working time range.");
         return; // 如果不在指定时间范围内，直接返回
       }
@@ -63,6 +60,7 @@ export default function Main() {
 
   return (
     <div className="App h-screen w-screen">
+      <CMDK />
       <Layout />
     </div>
   );

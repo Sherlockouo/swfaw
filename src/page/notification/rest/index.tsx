@@ -1,5 +1,4 @@
 import {
-  getRestCounts,
   getTodayRestCounts,
   insertOrUpdateLastInteraction,
   insertOrUpdateRestCount,
@@ -9,7 +8,6 @@ import { CircularProgress } from "@nextui-org/react";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { useEffect, useState } from "react";
 import { formatDateToYYYYMMDD } from "@/lib/format";
-import { RestCount } from "@/types/dbt";
 import { eventBus } from "@/lib/event-bus";
 
 export default function Rest() {
@@ -27,6 +25,7 @@ export default function Rest() {
       },
     );
   }, []);
+
   useEffect(() => {
     if (restTime >= breakDuration) return; // 如果倒计时结束，停止计时
 
@@ -43,8 +42,6 @@ export default function Rest() {
 
   // 关闭休息提醒
   const handleCloseOverlay = async () => {
-    const currentWindow = getCurrentWindow();
-    await currentWindow.hide();
     const now = Date.now();
     await insertOrUpdateRestCount({
       duration: restTime,
@@ -61,6 +58,9 @@ export default function Rest() {
       timestamp: now,
     });
     eventBus.trigger("refresh-last-interaction", now);
+
+    const currentWindow = getCurrentWindow();
+    await currentWindow.close();
   };
 
   return (
