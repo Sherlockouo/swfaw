@@ -13,6 +13,7 @@ import { enable, isEnabled, disable } from "@tauri-apps/plugin-autostart";
 import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import CheckUpdate from "./update";
 const Settings: React.FC = () => {
   const [autoStart, setAutoStart] = useState(false);
   const navigate = useNavigate();
@@ -54,6 +55,10 @@ const Settings: React.FC = () => {
               {" "}
               Automatic updates
             </Switch>
+          </div>
+
+          <div className="flex flex-col">
+            <CheckUpdate />
           </div>
         </div>
       ),

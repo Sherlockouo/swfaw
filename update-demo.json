@@ -1,0 +1,31 @@
+{
+  "version": "1.0.0",
+  "notes": "### What's New\n- Added new features\n- Fixed bugs\n- Improved performance",
+  "pub_date": "2024-12-16T20:48:05.745Z",
+  "platforms": {
+    "linux-x86_64": {
+      "signature": "path/to/linux-x86_64.signature",
+      "url": "https://github.com/sherlockouo/swfaw/releases/download/updater/swfaw-linux-x86_64.zip"
+    },
+    "windows-x86_64": {
+      "signature": "path/to/windows-x86_64.signature",
+      "url": "https://github.com/sherlockouo/swfaw/releases/download/updater/swfaw-windows-x86_64.zip"
+    },
+    "darwin-x86_64": {
+      "signature": "path/to/darwin-x86_64.signature",
+      "url": "https://github.com/sherlockouo/swfaw/releases/download/updater/swfaw-darwin-x86_64.zip"
+    },
+    "linux-aarch64": {
+      "signature": "path/to/linux-aarch64.signature",
+      "url": "https://github.com/sherlockouo/swfaw/releases/download/updater/swfaw-linux-aarch64.zip"
+    },
+    "windows-aarch64": {
+      "signature": "path/to/windows-aarch64.signature",
+      "url": "https://github.com/sherlockouo/swfaw/releases/download/updater/swfaw-windows-aarch64.zip"
+    },
+    "darwin-aarch64": {
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVTRkgrMlZkcHRJZ0dWR0E5dTVPT2N0ODZTdnBya3Z0Vy95eFlFbFI1T2YvVlVNMXYyM3p2MTFhd1QrbnNTbnA4WnZ3NjUwYVc2elBxQldXVFQ1dGNMV0RIN25JSkdoTEFjPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzM0Mjc0MDgwCWZpbGU6c3dmYXcuYXBwLnRhci5negpSejlTYXJxejZ3Z2cxUnpxa0t4dVpMdVpnQ2NNcjRvQ2FLMkVxTlg3K3ZhdnkyRzNTNFE1TUFJZEx0b3VzVHFnWjJNNVZBZHhjeDJIM01FR2pSRTdDQT09Cg==",
+      "url": "https://github.com/Sherlockouo/swfaw/releases/download/v1.0.0/swfaw.app.tar.gz"
+    }
+  }
+}
