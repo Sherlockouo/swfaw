@@ -21,7 +21,11 @@ export default function Main() {
   );
 
   const { isWorkingTime, updateWorkingTime } = useStore();
-
+  // 添加提醒音效
+  const playNotificationSound = () => {
+    const audio = new Audio("assets/audio/notification.mp3"); // 替换为你的音效文件路径
+    audio.play().catch((error) => console.error("Error playing sound:", error));
+  };
   // 定时检查是否需要显示休息提醒
   useEffect(() => {
     const checkTime = async () => {
@@ -31,9 +35,9 @@ export default function Main() {
         console.log("Not in working time range.");
         return; // 如果不在指定时间范围内，直接返回
       }
-
       const timeSinceLastInteraction = currentTime - lastInteraction;
       if (timeSinceLastInteraction >= breakInterval) {
+        playNotificationSound();
         await invoke("create_or_show_window", {
           label: "notify", // 窗口标识符
           title: "Stop Working For A While!", // 窗口标题

@@ -37,6 +37,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "./ui/collapsible";
+import { Button } from "@nextui-org/react";
 
 // Menu items.
 const data = {
@@ -212,13 +213,24 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
-        <div className="flex flex-col">
-          <div>
-            {theme === "light" ? (
-              <Sun onClick={() => setTheme("dark")} />
-            ) : (
-              <Moon onClick={() => setTheme("light")} />
-            )}
+        <div className="flex flex-col w-full">
+          <div className="px-2 flex justify-between gap-2 items-center">
+            <div className="div">
+              <Button color="primary" size="sm">
+                A
+              </Button>
+            </div>
+            <div>
+              {theme === "light" ? (
+                <Button isIconOnly>
+                  <Sun onClick={() => setTheme("dark")} />
+                </Button>
+              ) : (
+                <Button isIconOnly>
+                  <Moon onClick={() => setTheme("light")} />
+                </Button>
+              )}
+            </div>
           </div>
           <div>
             <NavUser user={data.user} />
