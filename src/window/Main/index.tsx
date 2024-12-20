@@ -7,9 +7,11 @@ import { insertOrUpdateLastInteraction } from "@/lib/db";
 import { formatDateToYYYYMMDD } from "@/lib/format";
 import { eventBus } from "@/lib/event-bus";
 import CMDK from "@/components/commandk";
+import { playNotificationSound } from "@/lib/notify/audio";
 
 export default function Main() {
-  const breakInterval = 20 * 60 * 1000; // 20分钟休息一次
+  const { breakDuration, isWorkingTime, updateWorkingTime } = useStore();
+  const breakInterval = breakDuration * 60 * 1000; // 20分钟休息一次
   // const breakInterval = 1 * 60 * 1000; // 20分钟休息一次
   // 使用 useConfig 管理 'lastInteraction'，以字符串格式存储和恢复
   const [lastInteraction, setLastInteraction] = useConfig(
@@ -20,12 +22,6 @@ export default function Main() {
     },
   );
 
-  const { isWorkingTime, updateWorkingTime } = useStore();
-  // 添加提醒音效
-  const playNotificationSound = () => {
-    const audio = new Audio("assets/audio/notification.mp3"); // 替换为你的音效文件路径
-    audio.play().catch((error) => console.error("Error playing sound:", error));
-  };
   // 定时检查是否需要显示休息提醒
   useEffect(() => {
     const checkTime = async () => {

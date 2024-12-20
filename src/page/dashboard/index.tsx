@@ -14,11 +14,11 @@ import { eventBus } from "@/lib/event-bus";
 import { useStore } from "@/store";
 
 const Dashboard: React.FC = React.memo(() => {
-  const breakInterval = 20 * 60 * 1000; // 20分钟休息一次
+  const { breakDuration, isWorkingTime } = useStore();
+  const breakInterval = breakDuration * 60 * 1000; // 20分钟休息一次
   const [lastInteraction, updateLastInteraction] = useState(0);
   const [timeLeft, setTimeLeft] = useState(() => breakInterval);
 
-  const { isWorkingTime } = useStore();
   const [todayRestCount, setTodayRestCount] = useState(0);
 
   const refreshRestCount = (newRestcount: number) => {

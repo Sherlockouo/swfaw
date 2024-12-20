@@ -15,30 +15,43 @@ name = "swfaw_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]
-tauri-build = { version = "2", features = [] }
+tauri-build = { version = "2.0.3", features = [] }
 
 [dependencies]
-tauri = { version = "2", features = [
+tauri = { version = "2.1.1", features = [
   "wry",
   "compression",
   "image-ico",
   "image-png",
   "tray-icon",
 ] }
-tauri-plugin-autostart = "2.0.0"
+tauri-plugin-autostart = "2.2.0"
 tauri-plugin-shell = "2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-tauri-plugin-window-state = "2.0.0"
-tauri-plugin-store = "2.0.0"
+tauri-plugin-window-state = "2.2.0"
+tauri-plugin-store = "2.2.0"
 tauri-plugin-dialog = "2.0.0"
 tauri-plugin-fs = "2.0.0"
 tauri-plugin-updater = "2.3.0"
 tauri-plugin-process = "2.2.0"
+tauri-plugin-websocket = "2.2.0"
+tauri-plugin-log = "2.2.0"
+tauri-plugin-single-instance = { version = "2.2.0", features = ["deep-link"] }
+log = "0.4.22"
+tracing = "0.1.41"
+tracing-subscriber = { version = "0.3", features = [
+  "env-filter",
+  "json",
+  "chrono",
+] }
+tauri-plugin-screen-lock-status = { git = "https://github.com/Sherlockouo/tauri-plugin-screen-lock-status.git" }
+tokio = "1.42.0"
 
-[dependencies.tauri-plugin-sql]
-features = ["sqlite"] # or "postgres", or "mysql"
-version = "2.0.0"
+tauri-plugin-sql = { version = "2.0.0", features = ["sqlite"] }
+tracing-core = "0.1.33"
+chrono = "0.4.39"
+tracing-serde = "0.2.0"
 
 [features]
 prod = ["tauri/custom-protocol"]

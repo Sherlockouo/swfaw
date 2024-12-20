@@ -1,51 +1,58 @@
-#[cfg(desktop)]
-mod tray;
-mod windows;
+mod command;
+mod schema;
+mod common {
+    pub mod tray;
+    pub mod utils;
+    pub mod windows;
+}
 
-use tauri::{Manager, RunEvent};
+use command::{create_or_show_window, create_symlink};
+use common::tray::create_tray;
+use common::utils::jsonformatter::JsonFormatter;
+use schema::Payload;
+use tauri::{Emitter, RunEvent};
 use tauri_plugin_autostart::MacosLauncher;
-use windows::WindowManager;
-
-#[tauri::command]
-async fn create_symlink(source: String, target: String) -> Result<(), String> {
-    std::os::unix::fs::symlink(source.clone(), target.clone()).map_err(|err| {
-        format!(
-            "Failed to create symlink from {} to {}: {}",
-            source, target, err
-        )
-    })
-}
-
-#[tauri::command]
-async fn create_or_show_window(
-    app: tauri::AppHandle,
-    label: String,
-    title: String,
-    width: f64,
-    height: f64,
-    show: bool,
-) {
-    // 检查窗口是否已经存在
-    if let Some(_window) = app.get_webview_window(&label) {
-        // 如果窗口存在并且 `show` 参数为 true，则显示窗口
-        // window.show().unwrap_or_else(|err| {
-        //     eprintln!("Failed to show window {}: {}", label, err);
-        // });
-        //
-    } else {
-        // 如果窗口不存在，则创建新窗口
-        WindowManager::create_window(&app, &label, &title, width, height);
-    }
-}
+use tracing::info;
+use tracing_subscriber::{fmt, layer::SubscriberExt, util::SubscriberInitExt};
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    let json_layer = fmt::layer().with_ansi(false).event_format(JsonFormatter);
+
+    // 启用 tracing
+    tracing_subscriber::registry()
+        // .with(
+        //     tracing_subscriber::EnvFilter::try_from_default_env().unwrap_or_else(|_| {
+        //         format!(
+        //             "{}=info,tower_http=info,axum=info",
+        //             env!("CARGO_CRATE_NAME")
+        //         )
+        //         .into()
+        //     }),
+        // )
+        .with(json_layer)
+        .init();
+
     #[allow(unused_mut)]
     let mut builder = tauri::Builder::default()
+        .plugin(tauri_plugin_single_instance::init(|app, argv, cwd| {
+            info!("{}, {argv:?}, {cwd}", app.package_info().name);
+            app.emit("single-instance", Payload { args: argv, cwd })
+                .unwrap();
+        }))
+        // .plugin(
+        //     tauri_plugin_log::Builder::default()
+        //         .level(log::LevelFilter::Info)
+        //         .build(),
+        // )
+        .plugin(tauri_plugin_screen_lock_status::init())
         .plugin(tauri_plugin_autostart::init(
             MacosLauncher::LaunchAgent,
             Some(vec!["com.sherlockouo.app"]),
         ))
+        .plugin(tauri_plugin_fs::init())
+        // .plugin(tauri_plugin_clipboard_manager::init())
+        .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_store::Builder::default().build()) // store
         .plugin(tauri_plugin_sql::Builder::default().build())
@@ -57,8 +64,10 @@ pub fn run() {
         .setup(move |app| {
             #[cfg(desktop)]
             {
-                tray::create_tray(app.handle())?;
+                create_tray(app.handle())?;
             }
+            // 监听屏幕是否亮起
+            let _ = tauri_plugin_screen_lock_status::WINDOW_TAURI.set(app.handle().clone());
 
             Ok(())
         });

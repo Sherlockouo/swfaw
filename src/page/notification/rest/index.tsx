@@ -9,6 +9,7 @@ import { getCurrentWindow } from "@tauri-apps/api/window";
 import { useEffect, useState } from "react";
 import { formatDateToYYYYMMDD } from "@/lib/format";
 import { eventBus } from "@/lib/event-bus";
+import { playNotificationSound } from "@/lib/notify/audio";
 
 export default function Rest() {
   const breakDuration = 20; // 注意力放到远处 20 s
@@ -27,18 +28,30 @@ export default function Rest() {
   }, []);
 
   useEffect(() => {
-    if (restTime >= breakDuration) return; // 如果倒计时结束，停止计时
+    // 如果休息时间达到或超过目标时长，不启动定时器
+    if (restTime >= breakDuration) {
+      return;
+    }
 
     const timerId = setInterval(() => {
-      setRestTime((prevTime) => prevTime + 1);
-      console.log("time", restTime);
-    }, 1000); // 每秒更新一次
+      setRestTime((prevTime) => {
+        console.log("time", prevTime + 1);
+        return prevTime + 1;
+      });
+    }, 1000);
 
     return () => {
-      clearInterval(timerId); // 清除定时器以防止内存泄漏
-      setRestTime(0);
+      clearInterval(timerId); // 清理定时器，防止内存泄漏
     };
-  }, []);
+  }, [restTime, breakDuration]); // 添加依赖项
+
+  useEffect(() => {
+    if (restTime >= breakDuration) {
+      playNotificationSound();
+      // 如果倒计时结束，播放提示音
+      return; // 如果倒计时结束，停止计时
+    }
+  }, [restTime]);
 
   // 关闭休息提醒
   const handleCloseOverlay = async () => {

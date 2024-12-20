@@ -10,6 +10,7 @@ import Ctx from "@/page/ctx";
 import SoftLinkCreator from "@/page/tools/symlink";
 import Todo from "@/page/ctx/Todo";
 import ReadWise from "@/page/ctx/readwise";
+import TimeUtil from "@/page/tools/timeutil";
 
 const routes: RouteObject[] = [
   {
@@ -23,6 +24,10 @@ const routes: RouteObject[] = [
   {
     path: "/tools/symlink",
     element: React.createElement(SoftLinkCreator),
+  },
+  {
+    path: "/tools/time",
+    element: React.createElement(TimeUtil),
   },
   {
     path: "/ctx",

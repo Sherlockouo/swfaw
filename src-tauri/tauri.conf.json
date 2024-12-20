@@ -10,12 +10,17 @@
     "frontendDist": "../dist"
   },
   "app": {
+    "withGlobalTauri": true,
+
     "windows": [
       {
         "title": "swfaw",
         "width": 800,
         "height": 600,
-        "resizable": true
+        "decorations": false,
+        "hiddenTitle": true,
+        "transparent": true,
+        "resizable": false
       }
     ],
     "security": {
