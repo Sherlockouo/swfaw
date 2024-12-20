@@ -21,15 +21,15 @@ pub fn run() {
 
     // 启用 tracing
     tracing_subscriber::registry()
-        // .with(
-        //     tracing_subscriber::EnvFilter::try_from_default_env().unwrap_or_else(|_| {
-        //         format!(
-        //             "{}=info,tower_http=info,axum=info",
-        //             env!("CARGO_CRATE_NAME")
-        //         )
-        //         .into()
-        //     }),
-        // )
+        .with(
+            tracing_subscriber::EnvFilter::try_from_default_env().unwrap_or_else(|_| {
+                format!(
+                    "{}=info,tower_http=info,axum=info",
+                    env!("CARGO_CRATE_NAME")
+                )
+                .into()
+            }),
+        )
         .with(json_layer)
         .init();
 
